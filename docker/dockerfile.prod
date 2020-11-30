@@ -1,0 +1,64 @@
+FROM  alpine:3.12
+
+ENV USER=nginx
+ENV UID=12345
+ENV GID=23456
+RUN adduser \
+    --disabled-password \
+    --gecos "" \
+    --home "$(pwd)" \
+    --no-create-home \
+    --uid "$UID" \
+    "$USER"
+
+WORKDIR /var/www/html
+#update  alpine linux
+RUN apk update && apk upgrade
+# install php latest version
+RUN apk add --no-cache  php7 \
+    postgresql-client \
+    php7-fpm \
+    php7-opcache \
+    php7-pdo \
+    php7-pgsql \
+    php7-pdo_pgsql \
+    php7-bcmath \
+    php7-mbstring \
+    php7-openssl \
+    php7-tokenizer \
+    php7-ctype \
+    php7-xml \
+    php7-fileinfo \
+    php7-json \
+    php7-pecl-igbinary \
+    php7-pecl-redis  \
+    php7-phar \
+    php7-dom \
+    php7-xmlwriter \
+    curl \
+    vim
+# install nginx
+RUN apk add --no-cache nginx
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin/ --filename=composer
+
+RUN mkdir /var/run/nginx  && touch nginx.pid
+
+COPY server/php-fpm/www.conf /etc/php7/php-fpm.d/
+
+COPY server/nginx/nginx.conf  /etc/nginx/
+COPY server/nginx/app.conf    /etc/nginx/conf.d/
+COPY server/nginx/php.conf    /etc/nginx/conf.d/
+
+COPY ./nginx/ .
+
+RUN composer install --no-ansi --no-dev --no-interaction --no-plugins --no-progress --no-scripts --no-suggest --optimize-autoloader
+RUN chmod 775   -R  storage
+#RUN chmod 775 -R  boostrap/cache/
+RUN chown nginx -R .
+RUN chmod +x docker/wait-for-it.sh
+
+#RUN php artisan migrate:fresh
+EXPOSE 80
+EXPOSE 9000
+CMD ["docker/wait-for-it.sh", "postgres", "user", "rootPassword"]
+#CMD ["nginx","-g", "daemon off;"]

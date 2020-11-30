@@ -1,0 +1,35 @@
+version: "3"
+services:
+    web:
+        build:
+            context: .
+            dockerfile: docker/dockerfile.dev
+        volumes:
+            - .:/var/www/html
+            - /var/www/html/vendor
+            -  /var/www/html/node_modules
+        ports:
+            - 8081:8000
+            - 3000:3000
+            - 3001:3001
+        networks:
+            network-auth:
+                ipv4_address: 172.20.0.2
+    postgres:
+        image: postgres
+        ports:
+            - 5432:5432
+        environment:
+            POSTGRES_DB: "app"
+            POSTGRES_USER: "postgres"
+            POSTGRES_PASSWORD: "postgres"
+        networks:
+            network-auth:
+                ipv4_address: 172.20.0.3
+networks:
+    network-auth:
+        driver: bridge
+        ipam:
+            driver: default
+            config:
+                - subnet: 172.20.0.0/24
