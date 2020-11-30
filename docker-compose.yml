@@ -14,7 +14,7 @@ services:
             - 3001:3001
         networks:
             network-auth:
-                ipv4_address: 172.20.0.2
+                ipv4_address: 172.30.0.2
     postgres:
         image: postgres
         ports:
@@ -25,11 +25,11 @@ services:
             POSTGRES_PASSWORD: "postgres"
         networks:
             network-auth:
-                ipv4_address: 172.20.0.3
+                ipv4_address: 172.30.0.3
 networks:
     network-auth:
         driver: bridge
         ipam:
             driver: default
             config:
-                - subnet: 172.20.0.0/24
+                - subnet: 172.30.0.0/24

@@ -57,6 +57,4 @@ COPY . .
 RUN  sudo npm install
 RUN sudo composer install
 
-#RUN chmod +x docker/wait-for-it.sh
-
 CMD ["docker/wait-for-it.sh", "postgres", "postgres" ,"postgres"]
